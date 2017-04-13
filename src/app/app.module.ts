@@ -11,13 +11,16 @@ import { AboutPage } from '../pages/about/about';
 
 import { WebBluetoothModule } from '@manekinekko/angular-web-bluetooth';
 
+import { MeshServiceComponent } from './mesh-service/mesh-service.component';
+
 
 
 @NgModule({
   declarations: [
     MyApp,
     AboutPage,
-    HomePage
+    HomePage,
+    MeshServiceComponent
   ],
   imports: [
     BrowserModule,
@@ -32,7 +35,8 @@ import { WebBluetoothModule } from '@manekinekko/angular-web-bluetooth';
   entryComponents: [
     MyApp,
     AboutPage,
-    HomePage
+    HomePage,
+    MeshServiceComponent
   ],
   providers: [
     StatusBar,
