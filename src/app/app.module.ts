@@ -10,10 +10,8 @@ import { HomePage } from '../pages/home/home';
 import { AboutPage } from '../pages/about/about';
 
 import { WebBluetoothModule } from '@manekinekko/angular-web-bluetooth';
-
+// mesh service
 import { MeshServiceComponent } from './mesh-service/mesh-service.component';
-
-
 
 @NgModule({
   declarations: [
@@ -44,4 +42,5 @@ import { MeshServiceComponent } from './mesh-service/mesh-service.component';
     {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]
 })
+
 export class AppModule {}
