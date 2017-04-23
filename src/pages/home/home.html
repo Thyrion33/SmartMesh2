@@ -16,7 +16,9 @@
 
   <mesh-packets></mesh-packets>
 
-    <ion-list inset>
+
+
+  <ion-list inset>
       <ion-item-sliding *ngFor="let device of devices" #slidingItem>
 
         <button ion-item (click)="connectToDevice( device )">

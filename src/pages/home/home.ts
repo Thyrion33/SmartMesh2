@@ -141,6 +141,8 @@ export class HomePage {
     });
   }
 
+
+
   // BLE helper functions
   // convert data to ArrayBuffers before sending
   // convert from ArrayBuffers when receiving

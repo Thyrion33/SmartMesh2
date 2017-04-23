@@ -27,7 +27,9 @@ import { MeshServiceComponent } from './mesh-service/mesh-service.component';
       name: '__mydb',
       driverOrder: [ 'indexeddb', 'sqlite', 'websql', 'asyncStorage']
     }),
-    WebBluetoothModule.forRoot()
+    WebBluetoothModule.forRoot({
+      enableTracing: true
+    })
   ],
   bootstrap: [IonicApp],
   entryComponents: [

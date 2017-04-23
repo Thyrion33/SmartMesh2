@@ -8,75 +8,101 @@ import { BluetoothCore } from '@manekinekko/angular-web-bluetooth';
 @Component({
     selector: 'mesh-packets',
     template: `
-    <a href="#" (click)="getMeshPacket()">MeshPacket ({{meshPacket || 'N/A'}}%)</a>
+
+    <ion-card *ngIf="!connected">
+      <ion-card-title>Connect</ion-card-title>
+      <button md-raised-button (click)="connect()" [disabled]="connecting">
+        <ion-icon>bluetooth_searching</ion-icon> Connect to Mesh Bridge
+      </button>
+    </ion-card>
+
+    <div *ngIf="connected">
+          <ion-card>
+            <ion-card-title><ion-icon>done</ion-icon> Connected</ion-card-title>
+
+            <ion-card-content>
+              <p>Device: {{deviceName}}</p>
+            </ion-card-content>
+
+            <a href="#" (click)="getMeshPacket()">MeshPacket ({{meshPacket || 'N/A'}}%)</a>
+
+
+            <button md-raised-button (click)="disconnect()">Disconnect</button>
+            <button md-button (click)="sendMsg( '1' )">SEND</button>
+          </ion-card>
+    </div>
+
+    <ion-card>
+        <ion-card-title>Debug Log</ion-card-title>
+        <ion-card-content>
+            <pre>{{debugLog}}</pre>
+            <button ion-button (click)="clearLog()"><ion-icon>delete</ion-icon></button>
+        </ion-card-content>
+    </ion-card>
   `,
-    styles: [`
-    a {
-      position: relative;
-      color: rgba(255,255,255,1);
-      text-decoration: none;
-      background-color: #CD2834;
-      font-family: monospace;
-      font-weight: 700;
-      font-size: 3em;
-      display: block;
-      padding: 4px;
-      border-radius: 8px;
-      box-shadow: 0px 9px 0px #B52231, 0px 9px 25px rgba(0,0,0,.7);
-      margin: 100px auto;
-      width: 410px;
-      text-align: center;
-      transition: all .1s ease;
-    }
-    a:active {
-      box-shadow: 0px 3px 0px rgba(219,31,5,1), 0px 3px 6px rgba(0,0,0,.9);
-      position: relative;
-      top: 6px;
-    }
-  `],
     providers: [ MeshService ]
 })
-export class MeshServiceComponent implements OnInit {
+export class MeshServiceComponent {
 
+    debugLog: string;
     meshPacket: string = '--';
     device: any = {};
+
+    connecting = false;
+    connected = false;
 
     constructor(
         public _zone: NgZone,
         public _meshService: MeshService
     ) {}
 
-    ngOnInit() {
-        this.getDeviceStatus();
-        this.streamValues();
-    }
 
     streamValues() {
         this._meshService.streamValues().subscribe( this.showMeshPacket.bind( this ));
     }
 
-    getDeviceStatus() {
-        this._meshService.getDevice().subscribe(
-            (device) => {
+    connect() {
+        this.connecting = true;
 
-                if(device) {
-                    this.device = device;
-                }
-                else {
-                    // device not connected or disconnected
-                    this.device = null;
-                    this.meshPacket = '--';
-                }
+        this._meshService.connectMesh()
+            .finally(() => {
+                this.connecting = false;
+            })
+            .subscribe(( device ) => {
+                this.connected = true;
+                this._meshService.receive$.subscribe( value => {
+                    this.debugLog += JSON.stringify( value );
+                });
+
             }
         );
+
+        //getShortMTL().subscribe( this.showMeshPacket.bind( this ));
+
     }
 
-    getFakeValue() {
-        this._meshService.getFakeValue();
+
+    get deviceName() {
+        return this._meshService.gatt ? this._meshService.gatt.device.name : null;
     }
 
-    getMeshPacket() {
-        return this._meshService.getCompleteMTL().subscribe(this.showMeshPacket.bind(this));
+
+    // this uses Observer to subscribe. Use map to create another observer with data mapping
+
+    // map data .map( (data: DataView) => {
+    // let value = data.getUint16(0, true /* little endian */);
+    // let mantissa = value & 0x0FFF;
+    //  let exponent = value >> 12;
+    //  let magnitude = Math.pow(2, exponent);
+    //  let output = (mantissa * magnitude);
+    //  let lux = output / 100.0;
+    //  return +lux.toFixed(2);
+    //});
+
+
+
+    disconnect() {
+        this._meshService.disconnect();
     }
 
     showMeshPacket( value: number ) {
@@ -86,6 +112,10 @@ export class MeshServiceComponent implements OnInit {
             console.log('Reading mesh %d', value);
             this.meshPacket = ''+value;
         });
+    }
+
+    sendMsg( value: string ){
+        this._meshService.writeCompleteMTL( value );
     }
 
 }
